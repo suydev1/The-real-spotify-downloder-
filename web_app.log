@@ -1,0 +1,44 @@
+🎵 Initializing Termux Spotify YouTube Downloader...
+📱 Termux environment detected - applying mobile optimizations
+✅ Spotify client initialized successfully
+📁 Download path: /storage/emulated/0/Music/SpotifyDownloads
+🗂️  Temp path: /storage/emulated/0/Download/temp_spotify
+💾 Available storage: 2.4 GB
+🎧 YouTube downloader configured for maximum quality
+✅ Storage permission already granted
+🔔 Notifications enabled
+📱 Mobile features initialized
+ * Serving Flask app 'web_app'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.17:5000
+Press CTRL+C to quit
+ * Restarting with stat
+🎵 Initializing Termux Spotify YouTube Downloader...
+📱 Termux environment detected - applying mobile optimizations
+✅ Spotify client initialized successfully
+📁 Download path: /storage/emulated/0/Music/SpotifyDownloads
+🗂️  Temp path: /storage/emulated/0/Download/temp_spotify
+💾 Available storage: 2.4 GB
+🎧 YouTube downloader configured for maximum quality
+✅ Storage permission already granted
+🔔 Notifications enabled
+📱 Mobile features initialized
+ * Debugger is active!
+ * Debugger PIN: 590-643-737
+127.0.0.1 - - [14/Aug/2025 16:42:15] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Aug/2025 16:42:58] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Aug/2025 16:42:59] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [14/Aug/2025 16:43:16] "GET /search_playlists?q=Lofi HTTP/1.1" 200 -
+127.0.0.1 - - [14/Aug/2025 16:43:35] "GET /test_connection HTTP/1.1" 200 -
+127.0.0.1 - - [14/Aug/2025 16:43:44] "POST /start_download HTTP/1.1" 302 -
+127.0.0.1 - - [14/Aug/2025 16:43:44] "GET /status/download_1755170024_6484 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Aug/2025 16:43:45] "GET /api/status/download_1755170024_6484 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Aug/2025 16:43:47] "GET /api/status/download_1755170024_6484 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Aug/2025 16:43:49] "GET /api/status/download_1755170024_6484 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Aug/2025 16:43:51] "GET /api/status/download_1755170024_6484 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Aug/2025 16:43:53] "GET /api/status/download_1755170024_6484 HTTP/1.1" 200 -
+
+🛑 Shutdown signal received. Cleaning up...
