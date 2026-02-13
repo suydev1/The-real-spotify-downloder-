@@ -102,3 +102,14 @@ python main.py "https://open.spotify.com/playlist/37i9dQZF1DXcBWFJp05Sa8"
 # Create a file with playlist URLs
 echo "https://open.spotify.com/playlist/..." >> playlists.txt
 while read url; do python main.py "$url"; done < playlists.txt
+```
+
+## 📦 Build an APK (Android App)
+
+You can package the web UI into an APK via PWA tooling:
+
+1. Run/host `web_app.py` on an HTTPS URL
+2. Ensure the app manifest and service worker are active
+3. Use PWABuilder to generate an Android APK
+
+Detailed steps: see `ANDROID_APK_GUIDE.md`.
