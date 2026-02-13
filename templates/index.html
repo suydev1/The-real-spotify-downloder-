@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1DB954">
+    <link rel="manifest" href="/static/manifest.webmanifest">
+    <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
     <title>Spotify Playlist Downloader</title>
     <style>
         * {
@@ -130,6 +133,23 @@
             margin-bottom: 10px;
         }
         
+        .install-btn {
+            background: rgba(29, 185, 84, 0.15);
+            border: 1px solid rgba(29, 185, 84, 0.5);
+            color: #c8ffd9;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-top: 10px;
+            margin-right: 8px;
+            display: none;
+        }
+
+        .install-btn:hover {
+            background: rgba(29, 185, 84, 0.25);
+        }
+
         .test-connection {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -361,9 +381,14 @@
             </button>
         </form>
         
-        <button class="test-connection" onclick="testConnection()">
-            Test Spotify Connection
-        </button>
+        <div>
+            <button class="install-btn" id="install-btn" onclick="installApp()">
+                Install App
+            </button>
+            <button class="test-connection" onclick="testConnection()">
+                Test Spotify Connection
+            </button>
+        </div>
         
         <div class="info-box">
             <h3>How it works:</h3>
@@ -446,6 +471,21 @@
                 });
         }
         
+        let deferredPrompt = null;
+
+        function installApp() {
+            if (!deferredPrompt) {
+                alert('Install prompt is not available yet. Open this page in Chrome on Android and try again.');
+                return;
+            }
+
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.finally(() => {
+                deferredPrompt = null;
+                document.getElementById('install-btn').style.display = 'none';
+            });
+        }
+
         function selectPlaylist(url, name) {
             document.getElementById('playlist_url').value = url;
             
@@ -483,6 +523,18 @@
         
         // Allow Enter key to trigger search
         document.addEventListener('DOMContentLoaded', function() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/static/sw.js').catch((error) => {
+                    console.warn('Service worker registration failed:', error);
+                });
+            }
+
+            window.addEventListener('beforeinstallprompt', (event) => {
+                event.preventDefault();
+                deferredPrompt = event;
+                document.getElementById('install-btn').style.display = 'inline-block';
+            });
+
             document.getElementById('search_query').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     searchPlaylists();
