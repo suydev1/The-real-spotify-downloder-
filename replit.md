@@ -1,76 +1,44 @@
-# Overview
+# Spotify Playlist Downloader - Web App
 
-This project is a Spotify playlist to YouTube downloader specifically optimized for mobile Android devices running Termux. The application downloads **maximum quality audio** with intelligent format selection (FLAC > Opus/WebM > AAC/M4A > 320kbps MP3) from YouTube based on Spotify playlist tracks, with complete metadata embedding and high-resolution album artwork. It's designed to handle mobile device constraints like limited memory, battery optimization, and Android-specific storage permissions.
+A web-based Spotify playlist to YouTube downloader. Users paste a Spotify playlist URL and download all tracks as high-quality MP3 files bundled in a zip archive.
 
-## Recent Changes (August 2025)
+## How to Run
 
-### Major Architecture Improvements:
-- **New main.py**: Complete rewrite with enhanced audio quality prioritization and mobile optimization
-- **Maximum Quality Engine**: Intelligent format selection prioritizing lossless FLAC, then high-bitrate Opus/WebM, AAC/M4A, and MP3 
-- **Enhanced Termux Integration**: Automatic environment detection, storage permission handling, and Android-specific optimizations
-- **Improved Metadata System**: Using mutagen library for comprehensive metadata embedding (replaced eyed3)
-- **Mobile-First Design**: Battery awareness, memory monitoring, and network condition handling
-- **Progress Visualization**: Added tqdm progress bars and colorama terminal colors for better UX
+The app starts automatically on port 5000 via the "Start application" workflow using `.venv/bin/python3 web_app.py`.
 
-# User Preferences
+## Required Secrets
 
-Preferred communication style: Simple, everyday language.
+Set these in Replit Secrets:
+- `SPOTIFY_CLIENT_ID` - From https://developer.spotify.com/dashboard/
+- `SPOTIFY_CLIENT_SECRET` - From https://developer.spotify.com/dashboard/
+- `SESSION_SECRET` - A random secret string for Flask session security
 
-# System Architecture
+## Architecture
 
-## Core Application Structure
-The system follows a modular Python architecture with a main downloader class and specialized utility modules:
+- **web_app.py** - Flask web application, main entry point for the web interface
+- **main.py** - Core downloader class (`TermuxSpotifyDownloader`) handling Spotify API + yt-dlp
+- **templates/index.html** - Main UI with playlist URL input and search functionality
+- **templates/status.html** - Download progress tracking page
+- **static/** - Service worker, manifest, and icons for PWA support
+- **utils/** - Audio quality, mobile optimization, and helper utilities
 
-- **Main Controller**: `TermuxSpotifyDownloader` class handles the primary workflow orchestration
-- **Utility Modules**: Separated concerns into specialized helpers for Termux integration, audio quality management, and mobile optimizations
-- **Configuration-driven**: Uses environment variables for API credentials and settings
+## Key Features
 
-## Audio Processing Pipeline
-The application implements a sophisticated audio quality management system:
+- Search Spotify public playlists by keyword
+- Paste any public Spotify playlist URL directly
+- Download up to 300 songs per playlist as MP3
+- Tracks downloaded from YouTube via yt-dlp with high quality settings
+- Songs bundled into a zip file for easy download
+- Progress tracking page with real-time status updates
 
-- **Quality Prioritization**: FLAC > Opus/WebM > High-quality M4A > 320kbps MP3 > Best available
-- **Metadata Embedding**: Complete ID3 tag support with album artwork, track info, and album details
-- **Format Flexibility**: Supports multiple audio formats (MP3, FLAC, M4A, OGG) with automatic conversion
+## Dependencies
 
-## Mobile-Specific Optimizations
-Designed specifically for resource-constrained mobile environments:
+Managed via `pyproject.toml` and installed in `.venv/`:
+- flask, spotipy, yt-dlp, mutagen, pillow, requests, python-dotenv, psutil, tqdm, colorama, gunicorn
 
-- **Memory Management**: Monitors available memory and implements low-memory modes
-- **Battery Awareness**: Checks battery status and adjusts behavior accordingly
-- **Image Optimization**: Resizes album artwork to mobile-appropriate dimensions (max 800x800)
-- **Progress Tracking**: Mobile-friendly progress indicators with ETA calculations
+## Security Notes
 
-## Termux Integration Layer
-Specialized Android/Termux environment handling:
-
-- **Environment Detection**: Automatically detects Termux runtime environment
-- **Permission Management**: Handles Android storage permissions through termux-setup-storage
-- **API Integration**: Leverages Termux:API for notifications and system integration
-- **Storage Optimization**: Manages temporary files and download locations appropriately
-
-## Error Handling and Resilience
-Built for mobile network conditions and interruptions:
-
-- **Resume Capability**: Handles interrupted downloads and retries failed attempts
-- **Network Awareness**: Adapts to mobile network conditions
-- **Graceful Degradation**: Falls back to lower quality when high-quality sources unavailable
-
-# External Dependencies
-
-## API Services
-- **Spotify Web API**: Uses spotipy library with client credentials flow for playlist access
-- **YouTube**: Leverages yt-dlp for video/audio extraction and download
-- **Termux:API**: Optional but recommended for Android system integration and notifications
-
-## Core Libraries
-- **spotipy**: Spotify API wrapper for playlist and track metadata retrieval
-- **yt-dlp**: Advanced YouTube downloader with format selection and quality options
-- **mutagen**: Audio metadata manipulation (ID3 tags, FLAC metadata)
-- **PIL/Pillow**: Image processing for album artwork optimization
-- **psutil**: System resource monitoring for memory and CPU usage
-- **requests**: HTTP client for artwork downloading and API calls
-
-## System Integration
-- **FFmpeg**: Audio format conversion and processing (bundled with yt-dlp)
-- **Android Storage Framework**: Access to external storage through Termux permissions
-- **Termux Environment**: Specialized mobile Linux environment with Android integration
+- Spotify credentials stored in Replit Secrets (not .env file)
+- Flask secret key loaded from SESSION_SECRET environment variable
+- Debug mode off by default (set FLASK_DEBUG=true to enable)
+- Spotify token cached in memory only (no file cache)

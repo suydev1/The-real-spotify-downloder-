@@ -110,9 +110,11 @@ class TermuxSpotifyDownloader:
             import urllib3
             urllib3.disable_warnings()
             
+            from spotipy.cache_handler import MemoryCacheHandler
             client_credentials_manager = SpotifyClientCredentials(
                 client_id=client_id,
-                client_secret=client_secret
+                client_secret=client_secret,
+                cache_handler=MemoryCacheHandler()
             )
             self.spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
             

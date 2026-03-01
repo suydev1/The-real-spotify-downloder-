@@ -23,7 +23,7 @@ import yt_dlp
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'spotify_downloader_secret_key_2025'
+app.secret_key = os.environ.get('SESSION_SECRET', os.urandom(24).hex())
 
 # Global storage for download status
 download_status_dict = {}
@@ -298,6 +298,6 @@ def test_connection():
         return jsonify({'status': 'error', 'message': f'Connection failed: {str(e)}'})
 
 if __name__ == '__main__':
-    # Create templates directory if it doesn't exist
     os.makedirs('templates', exist_ok=True)
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    app.run(host='0.0.0.0', port=5000, debug=debug)
