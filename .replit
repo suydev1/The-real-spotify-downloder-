@@ -27,7 +27,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = ".venv/bin/python3 web_app.py"
+args = "python3 web_app.py"
 waitForPort = 5000
 
 [[ports]]
