@@ -30,7 +30,19 @@ download_status_dict = {}
 
 class WebDownloader:
     def __init__(self):
-        self.downloader = TermuxSpotifyDownloader()
+        self.downloader = None
+        self._init_error = None
+        self._try_init()
+
+    def _try_init(self):
+        try:
+            self.downloader = TermuxSpotifyDownloader()
+        except RuntimeError as e:
+            self._init_error = str(e)
+            print(f"WARNING: {e}")
+
+    def is_ready(self):
+        return self.downloader is not None and self._init_error is None
         
     def download_single_track(self, search_query, track_info, output_dir):
         """Download a single track using yt-dlp with retries and better error handling"""
@@ -178,11 +190,27 @@ class WebDownloader:
 
 web_downloader = WebDownloader()
 
+def require_spotify(f):
+    """Decorator to check Spotify is configured before handling requests."""
+    from functools import wraps
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not web_downloader.is_ready():
+            error_msg = web_downloader._init_error or "Spotify credentials not configured."
+            flash(f'Setup required: {error_msg}')
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    setup_error = None
+    if not web_downloader.is_ready():
+        setup_error = web_downloader._init_error
+    return render_template('index.html', setup_error=setup_error)
 
 @app.route('/start_download', methods=['POST'])
+@require_spotify
 def start_download():
     playlist_url = request.form.get('playlist_url', '').strip()
     max_songs = int(request.form.get('max_songs', 300))
@@ -240,6 +268,7 @@ def download_file(download_id):
     return send_file(zip_path, as_attachment=True, download_name=filename)
 
 @app.route('/search_playlists')
+@require_spotify
 def search_playlists():
     query = request.args.get('q', '').strip()
     if not query:
@@ -288,8 +317,9 @@ def search_playlists():
 
 @app.route('/test_connection')
 def test_connection():
+    if not web_downloader.is_ready():
+        return jsonify({'status': 'error', 'message': web_downloader._init_error or 'Not configured'})
     try:
-        # Test Spotify connection
         results = web_downloader.downloader.spotify.search(q='test', type='artist', limit=1)
         return jsonify({'status': 'success', 'message': 'Spotify API connected successfully'})
     except Exception as e:

@@ -98,15 +98,12 @@ class TermuxSpotifyDownloader:
         client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
         
         if not client_id or not client_secret:
-            print(f"{Fore.RED}❌ Error: Spotify credentials not found!{Style.RESET_ALL}")
-            print("Please create a .env file with:")
-            print("SPOTIFY_CLIENT_ID=your_client_id")
-            print("SPOTIFY_CLIENT_SECRET=your_client_secret")
-            print("\nGet credentials from: https://developer.spotify.com/dashboard/")
-            sys.exit(1)
+            raise RuntimeError(
+                "Spotify credentials not found. Please set SPOTIFY_CLIENT_ID and "
+                "SPOTIFY_CLIENT_SECRET in the Replit Secrets tool."
+            )
             
         try:
-            # Handle urllib3/requests compatibility issue
             import urllib3
             urllib3.disable_warnings()
             
@@ -118,13 +115,13 @@ class TermuxSpotifyDownloader:
             )
             self.spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
             
-            # Test connection
             self.spotify.search('test', limit=1, type='artist')
             print(f"{Fore.GREEN}✅ Spotify client initialized successfully{Style.RESET_ALL}")
             
+        except RuntimeError:
+            raise
         except Exception as e:
-            print(f"{Fore.RED}❌ Error initializing Spotify client: {e}{Style.RESET_ALL}")
-            sys.exit(1)
+            raise RuntimeError(f"Error initializing Spotify client: {e}")
     
     def setup_paths(self):
         """Setup download paths optimized for Termux/Android"""

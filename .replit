@@ -27,7 +27,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "pip install flask flask-sqlalchemy spotipy yt-dlp python-dotenv mutagen tqdm colorama psutil pillow requests gunicorn && export PYTHONPATH=$PYTHONPATH:$(pwd)/src && python3 src/web_app.py"
+args = "pip install -q -r requirements.txt && export PYTHONPATH=$PYTHONPATH:$(pwd)/src && python3 src/web_app.py"
 waitForPort = 5000
 
 [[ports]]

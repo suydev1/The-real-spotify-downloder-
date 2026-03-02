@@ -317,6 +317,17 @@
                 </div>
             {% endif %}
         {% endwith %}
+
+        {% if setup_error %}
+        <div class="flash-messages">
+            <div class="flash-error" style="background: rgba(255,165,0,0.2); border-color: rgba(255,165,0,0.5);">
+                <strong>Setup Required:</strong> Spotify API credentials are not configured.<br>
+                Please add <code>SPOTIFY_CLIENT_ID</code> and <code>SPOTIFY_CLIENT_SECRET</code>
+                in the Replit Secrets tab. Get your credentials at
+                <a href="https://developer.spotify.com/dashboard/" target="_blank" style="color:#1DB954;">developer.spotify.com</a>.
+            </div>
+        </div>
+        {% endif %}
         
         <!-- Search Section -->
         <div class="search-section" id="search-section">

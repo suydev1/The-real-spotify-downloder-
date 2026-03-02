@@ -18,6 +18,16 @@ A modern, glassmorphism-themed web application for downloading Spotify playlists
     - `termux_helpers.py`: Legacy support for mobile environments.
   - `templates/`: HTML5 templates with glassmorphism CSS.
   - `static/`: PWA manifest, icons, and service workers.
+- `requirements.txt`: Python package dependencies.
 
 ## Setup
-The application is configured to run automatically on Replit. It requires `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` to be set in the Replit Secrets tool.
+The application requires Spotify API credentials to be set in the Replit Secrets tool:
+- `SPOTIFY_CLIENT_ID`
+- `SPOTIFY_CLIENT_SECRET`
+
+Get credentials at: https://developer.spotify.com/dashboard/
+
+The app will start without these credentials and show a setup banner guiding users through the configuration.
+
+## Running
+The workflow installs dependencies from `requirements.txt` and starts the Flask server on port 5000.
