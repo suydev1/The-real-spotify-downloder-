@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1DB954">
+    <link rel="manifest" href="/static/manifest.webmanifest">
+    <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+    <title>Spotify Playlist Downloader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0f0f0f url('https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            backdrop-filter: brightness(0.4);
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            text-align: center;
+            max-width: 600px;
+            width: 95%;
+            margin: 20px;
+        }
+
+        .logo {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #1DB954, #1ed760, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 35px;
+            font-size: 1.1em;
+            font-weight: 400;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        input[type="url"], input[type="number"], .search-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        input[type="url"]:focus, input[type="number"]:focus, .search-input:focus {
+            outline: none;
+            border-color: #1DB954;
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 4px rgba(29, 185, 84, 0.15);
+        }
+
+        .download-btn {
+            background: #1DB954;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 100%;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .download-btn:hover {
+            background: #1ed760;
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(29, 185, 84, 0.4);
+        }
+
+        .playlist-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 12px;
+            margin: 12px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .playlist-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(29, 185, 84, 0.4);
+            transform: translateX(5px);
+        }
+
+        .divider span {
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 20px;
+            padding: 4px 15px;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 20px;
+            margin-top: 30px;
+            text-align: left;
+            font-size: 0.95em;
+        }
+
+        .info-box h3 {
+            color: #1DB954;
+            margin-bottom: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 1.1em;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+
+        .playlist-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #404040;
+        }
+
+        .playlist-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .playlist-name {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1em;
+        }
+
+        .playlist-details {
+            color: #b3b3b3;
+            font-size: 0.8em;
+        }
+
+        .search-loading {
+            text-align: center;
+            padding: 20px;
+            color: #b3b3b3;
+        }
+
+        .search-empty {
+            text-align: center;
+            padding: 20px;
+            color: #b3b3b3;
+            font-style: italic;
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
+        .flash-error {
+            background: rgba(255, 69, 58, 0.1);
+            border: 1px solid rgba(255, 69, 58, 0.3);
+            color: #ff453a;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .install-btn, .test-connection {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-top: 10px;
+            transition: background-color 0.2s ease;
+            margin-right: 8px;
+        }
+
+        .install-btn:hover, .test-connection:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .example-links {
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .example-links a {
+            color: #1DB954;
+            text-decoration: none;
+            font-size: 0.8em;
+            display: block;
+            margin: 5px 0;
+            word-break: break-all;
+        }
+
+        .example-links a:hover {
+            text-decoration: underline;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-btn {
+            background: linear-gradient(45deg, #1DB954, #1ed760);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .divider span {
+            position: relative;
+            background: rgba(15, 15, 15, 0.8);
+            padding: 0 15px;
+            color: #b3b3b3;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .search-results {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .track-list {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        .track-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .track-number {
+            color: #b3b3b3;
+            font-size: 0.85em;
+            min-width: 24px;
+            text-align: right;
+        }
+
+        .track-title {
+            color: white;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .track-artist {
+            color: #b3b3b3;
+            font-size: 0.8em;
+        }
+
+        .status-banner {
+            background: rgba(29, 185, 84, 0.1);
+            border: 1px solid rgba(29, 185, 84, 0.2);
+            color: #1DB954;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .status-banner.error {
+            background: rgba(255, 69, 58, 0.1);
+            border-color: rgba(255, 69, 58, 0.3);
+            color: #ff453a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">Spotify Downloader</div>
+        <div class="subtitle">Browse public Spotify playlists and explore tracks</div>
+
+        <div id="status-banner" class="status-banner"></div>
+
+        <!-- Search Section -->
+        <div class="search-section" id="search-section">
+            <div class="form-group">
+                <label for="search_query">Search Public Playlists:</label>
+                <div class="search-container">
+                    <input
+                        type="text"
+                        id="search_query"
+                        placeholder="e.g., pop hits, rock classics, workout music..."
+                        class="search-input"
+                    >
+                    <button type="button" onclick="searchPlaylists()" class="search-btn">
+                        Search
+                    </button>
+                </div>
+            </div>
+
+            <div id="search-results" class="search-results"></div>
+        </div>
+
+        <div class="divider">
+            <span>OR ENTER URL</span>
+        </div>
+
+        <div class="form-group">
+            <label for="playlist_url">Enter Spotify Playlist URL:</label>
+            <input
+                type="url"
+                id="playlist_url"
+                placeholder="https://open.spotify.com/playlist/..."
+            >
+            <div class="example-links">
+                <strong style="color: #b3b3b3; font-size: 0.8em;">Try these playlists:</strong>
+                <a href="javascript:void(0)" onclick="setPlaylist('https://open.spotify.com/playlist/1c1jMO1OuHVuaHdx7B83R3')">Today's Hits Clean 2025</a>
+                <a href="javascript:void(0)" onclick="setPlaylist('https://open.spotify.com/playlist/0NvTo731cP2l4wYwGFzdQ0')">Clean HITS 2025</a>
+                <a href="javascript:void(0)" onclick="setPlaylist('https://open.spotify.com/playlist/4Jb4PDWREzNnbZcOHPcZPy')">Country Hits 2025</a>
+            </div>
+        </div>
+
+        <button type="button" class="download-btn" onclick="loadPlaylistTracks()">
+            View Playlist Tracks
+        </button>
+
+        <div id="track-results" class="track-list"></div>
+
+        <div style="margin-top: 20px;">
+            <button class="install-btn" id="install-btn" onclick="installApp()" style="display:none;">
+                Install App
+            </button>
+            <button class="test-connection" onclick="testConnection()">
+                Test Spotify Connection
+            </button>
+        </div>
+
+        <div class="info-box">
+            <h3>How it works:</h3>
+            <ul>
+                <li>Search for public Spotify playlists or paste a URL.</li>
+                <li>Browse track listings with artist and album details.</li>
+                <li>Test your Spotify API connection status.</li>
+                <li>Installable as a progressive web app (PWA).</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function setPlaylist(url) {
+            document.getElementById('playlist_url').value = url;
+        }
+
+        function showBanner(message, isError) {
+            const banner = document.getElementById('status-banner');
+            banner.textContent = message;
+            banner.style.display = 'block';
+            banner.className = 'status-banner' + (isError ? ' error' : '');
+            setTimeout(function() { banner.style.display = 'none'; }, 5000);
+        }
+
+        function testConnection() {
+            fetch('/api/test-connection')
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.status === 'success') {
+                        showBanner(data.message, false);
+                    } else {
+                        showBanner(data.message, true);
+                    }
+                })
+                .catch(function(error) {
+                    showBanner('Connection test failed: ' + error, true);
+                });
+        }
+
+        function searchPlaylists() {
+            var query = document.getElementById('search_query').value.trim();
+            if (!query) {
+                showBanner('Please enter a search term', true);
+                return;
+            }
+
+            var resultsDiv = document.getElementById('search-results');
+            resultsDiv.innerHTML = '<div class="search-loading">Searching for playlists...</div>';
+
+            fetch('/api/search-playlists?q=' + encodeURIComponent(query))
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.status === 'error') {
+                        resultsDiv.innerHTML = '<div class="search-empty">' + data.message + '</div>';
+                        return;
+                    }
+
+                    if (data.playlists && data.playlists.length > 0) {
+                        var html = '<div style="color: #1DB954; font-weight: bold; margin-bottom: 15px;">' +
+                            'Found ' + data.playlists.length + ' playlists:</div>';
+
+                        data.playlists.forEach(function(playlist) {
+                            var escapedName = playlist.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                            html += '<div class="playlist-item" onclick="selectPlaylist(\'' +
+                                playlist.url + "', '" + escapedName + "')\">" +
+                                (playlist.image ?
+                                    '<img src="' + playlist.image + '" class="playlist-image" alt="Playlist cover">' :
+                                    '<div class="playlist-image" style="display: flex; align-items: center; justify-content: center; color: #666;">&#127925;</div>'
+                                ) +
+                                '<div class="playlist-info">' +
+                                    '<div class="playlist-name">' + playlist.name + '</div>' +
+                                    '<div class="playlist-details">' +
+                                        playlist.tracks + ' songs &bull; by ' + playlist.owner +
+                                    '</div>' +
+                                '</div></div>';
+                        });
+
+                        resultsDiv.innerHTML = html;
+                    } else {
+                        resultsDiv.innerHTML = '<div class="search-empty">No public playlists found for this search term.</div>';
+                    }
+                })
+                .catch(function(error) {
+                    resultsDiv.innerHTML = '<div class="search-empty">Search failed: ' + error + '</div>';
+                });
+        }
+
+        function extractPlaylistId(url) {
+            if (url.includes('open.spotify.com') && url.includes('/playlist/')) {
+                return url.split('/playlist/')[1].split('?')[0];
+            }
+            if (url.startsWith('spotify:playlist:')) {
+                return url.split('spotify:playlist:')[1];
+            }
+            if (url.length === 22 && /^[a-zA-Z0-9_-]+$/.test(url)) {
+                return url;
+            }
+            return null;
+        }
+
+        function loadPlaylistTracks() {
+            var url = document.getElementById('playlist_url').value.trim();
+            if (!url) {
+                showBanner('Please enter a Spotify playlist URL', true);
+                return;
+            }
+
+            var playlistId = extractPlaylistId(url);
+            if (!playlistId) {
+                showBanner('Invalid Spotify playlist URL', true);
+                return;
+            }
+
+            var tracksDiv = document.getElementById('track-results');
+            tracksDiv.innerHTML = '<div class="search-loading">Loading playlist tracks...</div>';
+
+            fetch('/api/playlist-tracks?id=' + encodeURIComponent(playlistId))
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.status === 'error') {
+                        tracksDiv.innerHTML = '<div class="search-empty">' + data.message + '</div>';
+                        return;
+                    }
+
+                    var html = '<div style="color: #1DB954; font-weight: bold; margin-bottom: 10px;">' +
+                        data.playlist_name + ' &mdash; ' + data.tracks.length + ' tracks</div>';
+
+                    data.tracks.forEach(function(track, i) {
+                        html += '<div class="track-item">' +
+                            '<span class="track-number">' + (i + 1) + '</span>' +
+                            '<div>' +
+                                '<div class="track-title">' + track.name + '</div>' +
+                                '<div class="track-artist">' + track.artists + ' &bull; ' + track.album + '</div>' +
+                            '</div></div>';
+                    });
+
+                    tracksDiv.innerHTML = html;
+                })
+                .catch(function(error) {
+                    tracksDiv.innerHTML = '<div class="search-empty">Failed to load tracks: ' + error + '</div>';
+                });
+        }
+
+        var deferredPrompt = null;
+
+        function installApp() {
+            if (!deferredPrompt) {
+                showBanner('Install prompt is not available. Open in Chrome on Android and try again.', true);
+                return;
+            }
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.finally(function() {
+                deferredPrompt = null;
+                document.getElementById('install-btn').style.display = 'none';
+            });
+        }
+
+        function selectPlaylist(url, name) {
+            document.getElementById('playlist_url').value = url;
+            showBanner('Selected: ' + name, false);
+            document.getElementById('playlist_url').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/static/sw.js').catch(function(error) {
+                    console.warn('Service worker registration failed:', error);
+                });
+            }
+
+            window.addEventListener('beforeinstallprompt', function(event) {
+                event.preventDefault();
+                deferredPrompt = event;
+                document.getElementById('install-btn').style.display = 'inline-block';
+            });
+
+            document.getElementById('search_query').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchPlaylists();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
