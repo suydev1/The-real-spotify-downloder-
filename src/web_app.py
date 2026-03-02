@@ -1,7 +1,3 @@
-import os
-
-# ... (other code) ...
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=debug)
+# This file is no longer used.
+# The application has been converted to a static site with Netlify Functions.
+# See /public/index.html and /netlify/functions/ for the active code.
