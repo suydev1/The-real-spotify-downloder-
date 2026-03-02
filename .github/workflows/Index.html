@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1DB954">
+    <link rel="manifest" href="/static/manifest.webmanifest">
+    <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+    <title>Spotify Playlist Downloader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0f0f0f url('https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            backdrop-filter: brightness(0.4);
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            text-align: center;
+            max-width: 600px;
+            width: 95%;
+            margin: 20px;
+        }
+        
+        .logo {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #1DB954, #1ed760, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 35px;
+            font-size: 1.1em;
+            font-weight: 400;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+        
+        input[type="url"], input[type="number"], .search-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="url"]:focus, input[type="number"]:focus, .search-input:focus {
+            outline: none;
+            border-color: #1DB954;
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 4px rgba(29, 185, 84, 0.15);
+        }
+        
+        .download-btn {
+            background: #1DB954;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 100%;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .download-btn:hover {
+            background: #1ed760;
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(29, 185, 84, 0.4);
+        }
+        
+        .playlist-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 12px;
+            margin: 12px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .playlist-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(29, 185, 84, 0.4);
+            transform: translateX(5px);
+        }
+        
+        .divider span {
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 20px;
+            padding: 4px 15px;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 20px;
+            margin-top: 30px;
+            text-align: left;
+            font-size: 0.95em;
+        }
+        
+        .info-box h3 {
+            color: #1DB954;
+            margin-bottom: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 1.1em;
+        }
+        
+        .info-box ul {
+            margin-left: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+
+        .playlist-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #404040;
+        }
+        
+        .playlist-info {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .playlist-name {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1em;
+        }
+        
+        .playlist-details {
+            color: #b3b3b3;
+            font-size: 0.8em;
+        }
+        
+        .search-loading {
+            text-align: center;
+            padding: 20px;
+            color: #b3b3b3;
+        }
+        
+        .search-empty {
+            text-align: center;
+            padding: 20px;
+            color: #b3b3b3;
+            font-style: italic;
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        
+        .flash-error {
+            background: rgba(255, 69, 58, 0.1);
+            border: 1px solid rgba(255, 69, 58, 0.3);
+            color: #ff453a;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .install-btn, .test-connection {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-top: 10px;
+            transition: background-color 0.2s ease;
+            margin-right: 8px;
+        }
+        
+        .install-btn:hover, .test-connection:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .example-links {
+            margin-top: 15px;
+            text-align: left;
+        }
+        
+        .example-links a {
+            color: #1DB954;
+            text-decoration: none;
+            font-size: 0.8em;
+            display: block;
+            margin: 5px 0;
+            word-break: break-all;
+        }
+        
+        .example-links a:hover {
+            text-decoration: underline;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .search-btn {
+            background: linear-gradient(45deg, #1DB954, #1ed760);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .divider span {
+            position: relative;
+            background: rgba(15, 15, 15, 0.8);
+            padding: 0 15px;
+            color: #b3b3b3;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .search-results {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🎵 Spotify Downloader</div>
+        <div class="subtitle">Download playlists as high-quality MP3/FLAC files</div>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-error">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% if setup_error %}
+        <div class="flash-messages">
+            <div class="flash-error" style="background: rgba(255,165,0,0.2); border-color: rgba(255,165,0,0.5);">
+                <strong>Setup Required:</strong> Spotify API credentials are not configured.<br>
+                Please add <code>SPOTIFY_CLIENT_ID</code> and <code>SPOTIFY_CLIENT_SECRET</code>
+                in the Replit Secrets tab. Get your credentials at
+                <a href="https://developer.spotify.com/dashboard/" target="_blank" style="color:#1DB954;">developer.spotify.com</a>.
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Search Section -->
+        <div class="search-section" id="search-section">
+            <div class="form-group">
+                <label for="search_query">🔍 Search Public Playlists:</label>
+                <div class="search-container">
+                    <input 
+                        type="text" 
+                        id="search_query" 
+                        placeholder="e.g., pop hits, rock classics, workout music..."
+                        class="search-input"
+                    >
+                    <button type="button" onclick="searchPlaylists()" class="search-btn">
+                        Search
+                    </button>
+                </div>
+            </div>
+            
+            <div id="search-results" class="search-results"></div>
+        </div>
+
+        <div class="divider">
+            <span>OR DOWNLOAD VIDEO</span>
+        </div>
+
+        <form action="/download_video" method="POST">
+            <div class="form-group">
+                <label for="video_url">YouTube Video URL:</label>
+                <input 
+                    type="url" 
+                    id="video_url" 
+                    name="video_url" 
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    required
+                >
+            </div>
+            <button type="submit" class="download-btn" style="background: linear-gradient(45deg, #ff0000, #cc0000);">
+                🎬 Download Video
+            </button>
+        </form>
+        
+        <div class="divider">
+            <span>OPTIONS</span>
+        </div>
+
+        <form action="/start_download" method="POST">
+            <div class="form-group">
+                <label for="playlist_url">Enter Spotify Playlist URL Directly:</label>
+                <input 
+                    type="url" 
+                    id="playlist_url" 
+                    name="playlist_url" 
+                    placeholder="https://open.spotify.com/playlist/..."
+                    required
+                >
+                <div class="example-links">
+                    <strong style="color: #b3b3b3; font-size: 0.8em;">Try these working playlists:</strong>
+                    <a href="javascript:void(0)" onclick="setPlaylist('https://open.spotify.com/playlist/1c1jMO1OuHVuaHdx7B83R3')">Today's Hits Clean 2025</a>
+                    <a href="javascript:void(0)" onclick="setPlaylist('https://open.spotify.com/playlist/0NvTo731cP2l4wYwGFzdQ0')">Clean HITS 2025</a>
+                    <a href="javascript:void(0)" onclick="setPlaylist('https://open.spotify.com/playlist/4Jb4PDWREzNnbZcOHPcZPy')">Country Hits 2025</a>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="max_songs">Maximum Songs (1-300):</label>
+                <input 
+                    type="number" 
+                    id="max_songs" 
+                    name="max_songs" 
+                    value="50"
+                    min="1" 
+                    max="300"
+                    required
+                >
+            </div>
+            
+            <button type="submit" class="download-btn">
+                🚀 Start Download
+            </button>
+        </form>
+        
+        <div>
+            <button class="install-btn" id="install-btn" onclick="installApp()" style="display:none;">
+                Install App
+            </button>
+            <button class="test-connection" onclick="testConnection()">
+                Test Spotify Connection
+            </button>
+        </div>
+        
+        <div class="info-box">
+            <h3>How it works:</h3>
+            <ul>
+                <li>Enter a public Spotify playlist URL or search for one.</li>
+                <li>Or paste a YouTube video URL to download it directly.</li>
+                <li>Choose how many songs to download (max 300).</li>
+                <li>Get high-quality audio or video files.</li>
+                <li>Advanced error handling ensures your downloads complete.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        function setPlaylist(url) {
+            document.getElementById('playlist_url').value = url;
+        }
+        
+        function testConnection() {
+            fetch('/test_connection')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('✅ ' + data.message);
+                    } else {
+                        alert('❌ ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('❌ Connection test failed: ' + error);
+                });
+        }
+        
+        function searchPlaylists() {
+            const query = document.getElementById('search_query').value.trim();
+            if (!query) {
+                alert('Please enter a search term');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('search-results');
+            resultsDiv.innerHTML = '<div class="search-loading">🔍 Searching for playlists...</div>';
+            
+            fetch(`/search_playlists?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'error') {
+                        resultsDiv.innerHTML = `<div class="search-empty">❌ ${data.message}</div>`;
+                        return;
+                    }
+                    
+                    if (data.playlists && data.playlists.length > 0) {
+                        let html = `<div style="color: #1DB954; font-weight: bold; margin-bottom: 15px;">
+                            Found ${data.count} accessible playlists:
+                        </div>`;
+                        
+                        data.playlists.forEach(playlist => {
+                            html += `
+                                <div class="playlist-item" onclick="selectPlaylist('${playlist.url}', '${playlist.name.replace(/'/g, "\\\\'")}')">
+                                    ${playlist.image ? 
+                                        `<img src="${playlist.image}" class="playlist-image" alt="Playlist cover">` :
+                                        `<div class="playlist-image" style="display: flex; align-items: center; justify-content: center; color: #666;">🎵</div>`
+                                    }
+                                    <div class="playlist-info">
+                                        <div class="playlist-name">${playlist.name}</div>
+                                        <div class="playlist-details">
+                                            ${playlist.tracks} songs • by ${playlist.owner}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        resultsDiv.innerHTML = html;
+                    } else {
+                        resultsDiv.innerHTML = '<div class="search-empty">No accessible public playlists found for this search term.</div>';
+                    }
+                })
+                .catch(error => {
+                    resultsDiv.innerHTML = `<div class="search-empty">❌ Search failed: ${error}</div>`;
+                });
+        }
+        
+        let deferredPrompt = null;
+
+        function installApp() {
+            if (!deferredPrompt) {
+                alert('Install prompt is not available yet. Open this page in Chrome on Android and try again.');
+                return;
+            }
+
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.finally(() => {
+                deferredPrompt = null;
+                document.getElementById('install-btn').style.display = 'none';
+            });
+        }
+
+        function selectPlaylist(url, name) {
+            document.getElementById('playlist_url').value = url;
+            
+            // Visual feedback
+            const playlistItems = document.querySelectorAll('.playlist-item');
+            playlistItems.forEach(item => {
+                item.style.background = 'rgba(255, 255, 255, 0.05)';
+            });
+            event.currentTarget.style.background = 'rgba(29, 185, 84, 0.2)';
+            
+            // Show confirmation
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(45deg, #1DB954, #1ed760);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                z-index: 1000;
+                font-weight: bold;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            `;
+            notification.textContent = `✅ Selected: ${name}`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 3000);
+            
+            // Scroll to download form
+            document.querySelector('form').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Allow Enter key to trigger search
+        document.addEventListener('DOMContentLoaded', function() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/static/sw.js').catch((error) => {
+                    console.warn('Service worker registration failed:', error);
+                });
+            }
+
+            window.addEventListener('beforeinstallprompt', (event) => {
+                event.preventDefault();
+                deferredPrompt = event;
+                document.getElementById('install-btn').style.display = 'inline-block';
+            });
+
+            document.getElementById('search_query').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchPlaylists();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
