@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Status - Spotify Downloader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0f0f0f url('https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            backdrop-filter: brightness(0.4);
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            text-align: center;
+            max-width: 600px;
+            width: 95%;
+        }
+        
+        .logo {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #1DB954, #1ed760, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+        
+        .status-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 18px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .progress-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            height: 14px;
+            margin: 25px 0;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #1DB954, #1ed760);
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 0 15px rgba(29, 185, 84, 0.3);
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: -25px;
+            right: 0;
+            font-weight: 700;
+            font-size: 0.85em;
+            color: #1DB954;
+        }
+        
+        .status-info {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .status-info h3 {
+            color: #1DB954;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .current-song {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95em;
+            margin: 8px 0;
+            font-weight: 500;
+        }
+        
+        .download-btn {
+            background: #1DB954;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            width: calc(100% - 20px);
+        }
+        
+        .download-btn:hover {
+            background: #1ed760;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(29, 185, 84, 0.3);
+        }
+        
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9em;
+            text-decoration: none;
+            display: inline-block;
+            margin: 15px;
+            transition: all 0.2s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .error-message {
+            background: rgba(255, 69, 58, 0.1);
+            border: 1px solid rgba(255, 69, 58, 0.2);
+            color: #ff453a;
+            padding: 20px;
+            border-radius: 14px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .success-message {
+            background: rgba(29, 185, 84, 0.1);
+            border: 1px solid rgba(29, 185, 84, 0.2);
+            color: #1DB954;
+            padding: 20px;
+            border-radius: 14px;
+            margin: 20px 0;
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #1DB954;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            margin: 30px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            gap: 15px;
+        }
+        
+        .stat {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 12px;
+            flex: 1;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: 800;
+            color: #1DB954;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.75em;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🎵 Download Status</div>
+        
+        <div id="status-container">
+            <div class="loading-spinner"></div>
+            <p>Loading status...</p>
+        </div>
+        
+        <a href="/" class="back-btn">← Start New Download</a>
+    </div>
+    
+    <script>
+        const downloadId = '{{ download_id }}';
+        let refreshInterval;
+        
+        function updateStatus() {
+            fetch(`/api/status/${downloadId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('status-container');
+                    
+                    if (data.status === 'not_found') {
+                        container.innerHTML = `
+                            <div class="error-message">
+                                <h3>Download Not Found</h3>
+                                <p>The download session could not be found. It may have expired.</p>
+                            </div>
+                        `;
+                        clearInterval(refreshInterval);
+                        return;
+                    }
+                    
+                    let statusHtml = '';
+                    
+                    if (data.status === 'error') {
+                        statusHtml = `
+                            <div class="error-message">
+                                <h3>Download Failed</h3>
+                                <p>${data.error}</p>
+                            </div>
+                        `;
+                        clearInterval(refreshInterval);
+                    } else if (data.status === 'completed') {
+                        statusHtml = `
+                            <div class="success-message">
+                                <h3>Download Completed! 🎉</h3>
+                                <p>Your download has been successfully processed.</p>
+                            </div>
+                            
+                            <div class="stats">
+                                <div class="stat">
+                                    <div class="stat-number">${data.downloaded || 1}</div>
+                                    <div class="stat-label">Files</div>
+                                </div>
+                            </div>
+                            
+                            <a href="/download/${downloadId}" class="download-btn">
+                                📥 Download File
+                            </a>
+                        `;
+                        clearInterval(refreshInterval);
+                    } else {
+                        // In progress
+                        const progress = data.progress || 0;
+                        const statusText = {
+                            'initializing': 'Initializing download...',
+                            'fetching_playlist': 'Fetching information...',
+                            'downloading': 'Downloading...',
+                            'creating_zip': 'Packaging file...'
+                        }[data.status] || 'Processing...';
+                        
+                        statusHtml = `
+                            <div class="status-card">
+                                <h3>${data.playlist_name || 'Processing...'}</h3>
+                                
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width: ${progress}%">
+                                        <div class="progress-text">${progress}%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="status-info">
+                                    <h3>Status</h3>
+                                    <p>${statusText}</p>
+                                    ${data.current_song ? `
+                                        <div class="current-song">
+                                            <strong>Current:</strong> ${data.current_song}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                
+                                <div class="stats">
+                                    <div class="stat">
+                                        <div class="stat-number">${data.downloaded || 0}</div>
+                                        <div class="stat-label">Processed</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="stat-number">${data.total || '?'}</div>
+                                        <div class="stat-label">Total</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    container.innerHTML = statusHtml;
+                })
+                .catch(error => {
+                    console.error('Error fetching status:', error);
+                    document.getElementById('status-container').innerHTML = `
+                        <div class="error-message">
+                            <h3>Connection Error</h3>
+                            <p>Unable to fetch download status. Please refresh the page.</p>
+                        </div>
+                    `;
+                });
+        }
+        
+        updateStatus();
+        refreshInterval = setInterval(updateStatus, 2000);
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>
