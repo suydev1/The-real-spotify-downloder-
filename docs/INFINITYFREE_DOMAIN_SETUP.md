@@ -4,7 +4,7 @@ This project is a **Python/Flask** app. InfinityFree free hosting does not run p
 
 ## Recommended architecture
 
-1. Deploy this app to a Python host (for example your KstaBump target host, Render, Railway, Fly.io, etc.).
+1. Deploy this app to a Python host (for example KataBump, Render, Railway, Fly.io, etc.).
 2. Keep `suyash.gt.tc` managed in InfinityFree.
 3. Point your domain DNS to the Python host.
 
@@ -50,3 +50,6 @@ Expected JSON includes `status: ok`.
 ## Important note
 
 DNS propagation can take up to 72 hours, but often updates begin working in minutes to a few hours.
+
+
+For full KataBump steps, see `docs/KATABUMP_DEPLOYMENT.md`.
